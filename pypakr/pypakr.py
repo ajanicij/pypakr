@@ -5,36 +5,6 @@ import ConfigParser
 import os.path, re
 import tempfile
 
-pypakrdir = ''
-
-def usage():
-  print '''
-bonnington
-Containerized Python
-Usage:
-pypakr <command> <parameters>
-  - Commands:
-    - init              - initialize
-    - create-image      - create image
-       - Arguments:
-         -s, --src <source-file>
-         -i, --image <image-file>
-    - create-container  - create container
-       - Arguments:
-         -i, --image <image-file>
-         -c, --container <container-directory>
-    - run               - run container (execute script run in the
-                          container's virtual environment)
-       - Arguments:
-         -c, --container <container-directory>
-
-Configuration is in file ~/.pypakr
-[Global]
-base = /home/george/pypakr/BASE
-pypakrdir = /home/george/pypakr
-'''
-  sys.exit(0)
-
 def containing_directory(path):
   abspath = os.path.abspath(path)
   return os.path.dirname(abspath)
@@ -88,60 +58,7 @@ def untar(file, directory):
   line = 'tar xvf %s --directory=%s' % (file, directory)
   os.system(line)
 
-def tar(directory, file):
-  print 'tar %s to %s' % (directory, file)
-  line = 'cd %s && tar cvf IMAGE.tar *' % directory
-  os.system(line)
-  shutil.copy('%s/IMAGE.tar' % directory, file)
-
-def main(argv):
-  global pypakrdir
-  if len(argv) == 1:
-    usage()
-  command = argv[1]
-  if command == 'help':
-    usage()
-  # Parse command line.
-  try:
-    opts, args = getopt.getopt(sys.argv[2:], 'hs:i:c:', ['help',
-      'src', 'image', 'container'])
-  except Exception as err:
-    print str(err)
-    usage()
-  opt_s = None
-  opt_i = None
-  opt_c = None
-  for o, a in opts:
-    if o in ['-s', '--src']:
-      opt_s = a
-    elif o in ['-i', '--image']:
-      opt_i = a
-    elif o in ['-c', '--container']:
-      opt_c = a
-    elif o in ['-h', '--help']:
-      usage()
-    else:
-      assert False, 'Unrecognized option: %s' % o
-  config = ConfigParser.RawConfigParser()
-  home = os.environ['HOME']
-  config_path = '%s/.pypakr' % home
-  config.read(config_path)
-  base = config.get('Global', 'base')
-  pypakrdir = config.get('Global', 'pypakrdir')
-  print 'command=', command
-  if command == 'create-image':
-    command_create_image(base=base, src=opt_s, dst=opt_i)
-  elif command == 'create-container':
-    command_create_container(base=base, image=opt_i, container=opt_c)
-  elif command == 'init':
-    command_init(base)
-  elif command == 'run':
-    command_run(container=opt_c)
-  else:
-    assert Exception, 'Unrecognized command: %s' % command
-
-def command_create_image(base, src, dst):
-  global pypakrdir
+def command_create_image(base, src, dst, pypakrdir=''):
   if not os.path.exists(src):
     raise Exception('file doesn\'t exist: %s' % src)
   flag_union_created = False
@@ -215,8 +132,3 @@ def command_run(container):
   if (not os.path.exists(container)) or (not os.path.isdir(container)):
     raise Exception('%s is not a directory' % container)
   os.system('cd %s && vex --path . ./run' % container)
-
-if __name__ == '__main__':
-  main(sys.argv)
-
-# print containing_directory('ddd')

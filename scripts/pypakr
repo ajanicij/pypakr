@@ -1,0 +1,89 @@
+#!/usr/bin/python
+
+import sys, getopt, os, shutil
+import ConfigParser
+import os.path, re
+import tempfile
+from pypakr import command_create_container, command_create_image, \
+  command_init, command_run
+
+pypakrdir = ''
+
+def usage():
+  print '''
+pypakr
+Python containers
+Usage:
+pypakr <command> <parameters>
+  - Commands:
+    - init              - initialize
+    - create-image      - create image
+       - Arguments:
+         -s, --src <source-file>
+         -i, --image <image-file>
+    - create-container  - create container
+       - Arguments:
+         -i, --image <image-file>
+         -c, --container <container-directory>
+    - run               - run container (execute script run in the
+                          container's virtual environment)
+       - Arguments:
+         -c, --container <container-directory>
+
+Configuration is in file ~/.pypakr
+[Global]
+base = /home/george/pypakr/BASE
+pypakrdir = /home/george/pypakr
+'''
+  sys.exit(0)
+
+def main(argv):
+  global pypakrdir
+  if len(argv) == 1:
+    usage()
+  command = argv[1]
+  if command == 'help':
+    usage()
+  # Parse command line.
+  try:
+    opts, args = getopt.getopt(sys.argv[2:], 'hs:i:c:', ['help',
+      'src', 'image', 'container'])
+  except Exception as err:
+    print str(err)
+    usage()
+  opt_s = None
+  opt_i = None
+  opt_c = None
+  for o, a in opts:
+    if o in ['-s', '--src']:
+      opt_s = a
+    elif o in ['-i', '--image']:
+      opt_i = a
+    elif o in ['-c', '--container']:
+      opt_c = a
+    elif o in ['-h', '--help']:
+      usage()
+    else:
+      assert False, 'Unrecognized option: %s' % o
+  config = ConfigParser.RawConfigParser()
+  home = os.environ['HOME']
+  config_path = '%s/.pypakr' % home
+  config.read(config_path)
+  base = config.get('Global', 'base')
+  pypakrdir = config.get('Global', 'pypakrdir')
+  print 'command=', command
+  this_dir, this_filename = os.path.split(__file__)
+  pypakrdir = this_dir
+  if command == 'create-image':
+    command_create_image(base=base, src=opt_s, dst=opt_i, pypakrdir=pypakrdir)
+  elif command == 'create-container':
+    command_create_container(base=base, image=opt_i, container=opt_c)
+  elif command == 'init':
+    command_init(base)
+  elif command == 'run':
+    command_run(container=opt_c)
+  else:
+    assert Exception, 'Unrecognized command: %s' % command
+
+if __name__ == '__main__':
+  main(sys.argv)
