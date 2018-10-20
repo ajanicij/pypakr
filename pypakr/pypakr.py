@@ -6,6 +6,34 @@ import os.path, re
 import tempfile
 import tarfile
 
+def usage():
+  print '''
+pypakr
+Python containers
+Usage:
+pypakr <command> <parameters>
+  - Commands:
+    - init              - initialize
+    - create-image      - create image
+       - Arguments:
+         -s, --src <source-file>
+         -i, --image <image-file>
+    - create-container  - create container
+       - Arguments:
+         -i, --image <image-file>
+         -c, --container <container-directory>
+    - run               - run container (execute script run in the
+                          container's virtual environment)
+       - Arguments:
+         -c, --container <container-directory>
+
+Configuration is in file ~/.pypakr
+[Global]
+base = /home/george/pypakr/BASE
+pypakrdir = /home/george/pypakr
+'''
+  sys.exit(0)
+
 def containing_directory(path):
   abspath = os.path.abspath(path)
   return os.path.dirname(abspath)
@@ -63,10 +91,14 @@ def untar(file, directory):
 
 def tar(srcdir, dist):
   tf = tarfile.open(dist, 'w')
-  l = listdir(srcdir)
+  pathsave = os.getcwd()
+  os.chdir(srcdir)
+  l = os.listdir('.')
+  print 'tar: l is', l
   for f in l:
     tf.add(f)
   tf.close()
+  os.chdir(pathsave)
 
 def create_install(dir):
   filepath = os.path.join(dir, 'install')
@@ -74,7 +106,7 @@ def create_install(dir):
   f.write('''#!/bin/sh
 
 ./setup
-'''
+''')
   f.close()
   os.chmod(filepath, 0744)
 
@@ -105,7 +137,9 @@ def command_create_image(base, src, dst, pypakrdir=''):
     line = 'cd %s && vex --path . ./install' % imgdir
     print 'calling', line
     os.system(line)
+    print 'calling fusermount'
     os.system('fusermount -u %s' % imgdir)
+    flag_union_created = False
     tar(srcdir, dst)
     os.system('rm -rf %s' % tmpdir)
   except Exception as ex:

@@ -5,37 +5,9 @@ import ConfigParser
 import os.path, re
 import tempfile
 from pypakr import command_create_container, command_create_image, \
-  command_init, command_run
+  command_init, command_run, usage
 
 pypakrdir = ''
-
-def usage():
-  print '''
-pypakr
-Python containers
-Usage:
-pypakr <command> <parameters>
-  - Commands:
-    - init              - initialize
-    - create-image      - create image
-       - Arguments:
-         -s, --src <source-file>
-         -i, --image <image-file>
-    - create-container  - create container
-       - Arguments:
-         -i, --image <image-file>
-         -c, --container <container-directory>
-    - run               - run container (execute script run in the
-                          container's virtual environment)
-       - Arguments:
-         -c, --container <container-directory>
-
-Configuration is in file ~/.pypakr
-[Global]
-base = /home/george/pypakr/BASE
-pypakrdir = /home/george/pypakr
-'''
-  sys.exit(0)
 
 def main(argv):
   global pypakrdir
