@@ -4,6 +4,7 @@ import sys, getopt, os, shutil
 import ConfigParser
 import os.path, re
 import tempfile
+import tarfile
 
 def containing_directory(path):
   abspath = os.path.abspath(path)
@@ -55,8 +56,27 @@ def adjust_virtualenv(directory):
 
 def untar(file, directory):
   print 'untar %s to %s' % (file, directory)
-  line = 'tar xvf %s --directory=%s' % (file, directory)
-  os.system(line)
+  # line = 'tar xvf %s --directory=%s' % (file, directory)
+  # os.system(line)
+  tar = tarfile.open(file)
+  tar.extractall(path=directory)
+
+def tar(srcdir, dist):
+  tf = tarfile.open(dist, 'w')
+  l = listdir(srcdir)
+  for f in l:
+    tf.add(f)
+  tf.close()
+
+def create_install(dir):
+  filepath = os.path.join(dir, 'install')
+  f = open(filepath, 'w')
+  f.write('''#!/bin/sh
+
+./setup
+'''
+  f.close()
+  os.chmod(filepath, 0744)
 
 def command_create_image(base, src, dst, pypakrdir=''):
   if not os.path.exists(src):
@@ -79,7 +99,8 @@ def command_create_image(base, src, dst, pypakrdir=''):
     os.system(line)
     flag_union_created = True
     print 'pypakrdir=', pypakrdir
-    shutil.copy('%s/install' % pypakrdir, imgdir)
+    # shutil.copy('%s/install' % pypakrdir, imgdir)
+    create_install(imgdir)
     adjust_virtualenv(imgdir)
     line = 'cd %s && vex --path . ./install' % imgdir
     print 'calling', line

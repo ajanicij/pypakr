@@ -13,6 +13,7 @@ setuptools.setup(
   long_description_content_type='text/markdown',
   url='https://github.com/ajanicij/pypakr',
   packages=setuptools.find_packages(),
+  include_package_data=True,
   classifiers=[
     'Programming Language :: Python :: 2.7',
     'License :: OSI Approved :: Apache 2.0',
@@ -21,4 +22,8 @@ setuptools.setup(
   scripts = [
     'scripts/pypakr'
   ],
+  install_requires=['vex'],
+  package_data={
+    'data': ['install'],
+  },
 )
