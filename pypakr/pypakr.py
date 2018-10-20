@@ -158,21 +158,26 @@ def command_create_container(base, image, container):
   try:
     os.mkdir(container)
     flag_container_created = True
-    os.system('cp -R %s/* %s' % (base, container))
+    # os.system('cp -R %s/* %s' % (base, container))
+    shutil.copytree(base, container)
     tmpdir = tempfile.mkdtemp()
     flag_tmpdir_created = True
     print 'tmpdir=', tmpdir
-    imgdir = '%s/IMAGE' % tmpdir
+    # imgdir = '%s/IMAGE' % tmpdir
+    imgdir = os.path.join(tmpdir, 'IMAGE')
     print 'imgdir=', imgdir
     os.mkdir(imgdir)
     untar(image, imgdir)
-    os.system('cp -R %s/* %s' % (imgdir, container))
+    # os.system('cp -R %s/* %s' % (imgdir, container))
+    shutil.copytree(imgdir, container)
     adjust_virtualenv(container)
   except Exception as ex:
     if flag_tmpdir_created:
-      os.system('rm -rf %s' % tmpdir)
+      # os.system('rm -rf %s' % tmpdir)
+      shutil.rmtree(tmpdir)
     if flag_container_created:
-      os.system('rm -rf %s' % container)
+      # os.system('rm -rf %s' % container)
+      shutil.rmtree(container)
     raise ex
 
 def command_init(base):
