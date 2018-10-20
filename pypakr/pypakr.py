@@ -57,35 +57,33 @@ def adjust_file(file, pattern, target, home):
 def adjust_virtualenv(directory):
   print 'adjust_virtualenv'
   abspath = os.path.abspath(directory)
-  bindir = abspath + '/bin'
-  pythonpath = bindir + '/python'
+  bindir = os.path.join(abspath, 'bin')
+  pythonpath = os.path.join(bindir, 'python')
   print 'bindir=', bindir
   print 'abspath=', abspath
-  adjust_file(bindir + '/activate',
+  adjust_file(os.path.join(bindir, 'activate'),
     'VIRTUAL_ENV=".*"', 'VIRTUAL_ENV="%s"\n', abspath)
-  adjust_file(bindir + '/activate.csh',
+  adjust_file(os.path.join(bindir, 'activate.csh'),
     'setenv VIRTUAL_ENV ".*"', 'setenv VIRTUAL_ENV "%s"\n', abspath)
-  adjust_file(bindir + '/activate.fish',
+  adjust_file(os.path.join(bindir, 'activate.fish'),
     'set -gx VIRTUAL_ENV ".*"', 'set -gx VIRTUAL_ENV "%s"\n', abspath)
-  adjust_file(bindir + '/easy_install',
+  adjust_file(os.path.join(bindir, '/easy_install'),
     '#!/.*', '#!%s\n', pythonpath)
-  adjust_file(bindir + '/easy_install-2.7',
+  adjust_file(os.path.join(bindir, 'easy_install-2.7'),
     '#!/.*', '#!%s\n', pythonpath )
-  adjust_file(bindir + '/pip',
+  adjust_file(os.path.join(bindir, 'pip'),
     '#!/.*', '#!%s\n', pythonpath)
-  adjust_file(bindir + '/pip2',
+  adjust_file(os.path.join(bindir, 'pip2'),
     '#!/.*', '#!%s\n', pythonpath)
-  adjust_file(bindir + '/pip2.7',
+  adjust_file(os.path.join(bindir, 'pip2.7'),
     '#!/.*', '#!%s\n', pythonpath)
-  adjust_file(bindir + '/python-config',
+  adjust_file(os.path.join(bindir, 'python-config'),
     '#!/.*', '#!%s\n', pythonpath)
-  adjust_file(bindir + '/wheel',
+  adjust_file(os.path.join(bindir, 'wheel'),
     '#!/.*', '#!%s\n', pythonpath)
 
 def untar(file, directory):
-  print 'untar %s to %s' % (file, directory)
-  # line = 'tar xvf %s --directory=%s' % (file, directory)
-  # os.system(line)
+  # print 'untar %s to %s' % (file, directory)
   tar = tarfile.open(file)
   tar.extractall(path=directory)
 
@@ -94,7 +92,7 @@ def tar(srcdir, dist):
   pathsave = os.getcwd()
   os.chdir(srcdir)
   l = os.listdir('.')
-  print 'tar: l is', l
+  # print 'tar: l is', l
   for f in l:
     tf.add(f)
   tf.close()
@@ -115,23 +113,21 @@ def command_create_image(base, src, dst, pypakrdir=''):
     raise Exception('file doesn\'t exist: %s' % src)
   flag_union_created = False
   flag_tmpdir_created = False
-  # TODO: try-except
   try:
     tmpdir = tempfile.mkdtemp()
     flag_tmpdir_created = True
     print 'tmpdir=', tmpdir
-    srcdir = '%s/SRC' % tmpdir
+    srcdir = os.path.join(tmpdir, 'SRC')
     print 'srcdir=', srcdir
     os.mkdir(srcdir)
     untar(src, srcdir)
-    imgdir = '%s/IMAGE' % tmpdir
+    imgdir = os.path.join(tmpdir, 'IMAGE')
     print 'imgdir=', imgdir
     os.mkdir(imgdir)
     line = 'unionfs -o cow %s=RW:%s=RO %s' % (srcdir, base, imgdir)
     os.system(line)
     flag_union_created = True
     print 'pypakrdir=', pypakrdir
-    # shutil.copy('%s/install' % pypakrdir, imgdir)
     create_install(imgdir)
     adjust_virtualenv(imgdir)
     line = 'cd %s && vex --path . ./install' % imgdir
@@ -141,12 +137,14 @@ def command_create_image(base, src, dst, pypakrdir=''):
     os.system('fusermount -u %s' % imgdir)
     flag_union_created = False
     tar(srcdir, dst)
-    os.system('rm -rf %s' % tmpdir)
+    # os.system('rm -rf %s' % tmpdir)
+    shutil.rmtree(tmpdir)
   except Exception as ex:
     if flag_union_created:
       os.system('fusermount -u %s' % imgdir)
     if flag_tmpdir_created:
-      os.system('rm -rf %s' % tmpdir)
+      # os.system('rm -rf %s' % tmpdir)
+      shutil.rmtree(tmpdir)
     raise ex
 
 def command_create_container(base, image, container):
