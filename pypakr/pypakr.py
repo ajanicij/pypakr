@@ -87,17 +87,23 @@ def untar(file, directory):
   # print 'untar %s to %s' % (file, directory)
   tar = tarfile.open(file)
   tar.extractall(path=directory)
+  tar.close()
 
 def tar(srcdir, dist):
   tf = tarfile.open(dist, 'w')
-  pathsave = os.getcwd()
-  os.chdir(srcdir)
-  l = os.listdir('.')
-  # print 'tar: l is', l
-  for f in l:
-    tf.add(f)
-  tf.close()
-  os.chdir(pathsave)
+  flag_chdir = False
+  try:
+    pathsave = os.getcwd()
+    os.chdir(srcdir)
+    flag_chdir = True
+    l = os.listdir('.')
+    # print 'tar: l is', l
+    for f in l:
+      tf.add(f)
+  finally:
+    tf.close()
+  if flag_chdir:
+    os.chdir(pathsave)
 
 def create_install(dir):
   filepath = os.path.join(dir, 'install')
@@ -149,7 +155,7 @@ def command_create_image(base, src, dst, pypakrdir=''):
     raise ex
 
 def command_create_container(base, image, container):
-  print 'In command_create_container'
+  # print 'In command_create_container'
   if not os.path.exists(image):
     raise Exception('file doesn\'t exist: %s' % image)
   if (image == None) or (container == None):
@@ -179,6 +185,7 @@ def command_create_container(base, image, container):
     # shutil.copytree(imgdir, container)
     distutils.dir_util.copy_tree(imgdir, container)
     adjust_virtualenv(container)
+    shutil.rmtree(tmpdir)
   except Exception as ex:
     if flag_tmpdir_created:
       # os.system('rm -rf %s' % tmpdir)

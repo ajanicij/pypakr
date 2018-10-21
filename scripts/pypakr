@@ -43,7 +43,7 @@ def main(argv):
   config.read(config_path)
   base = config.get('Global', 'base')
   pypakrdir = config.get('Global', 'pypakrdir')
-  print 'command=', command
+  # print 'command=', command
   this_dir, this_filename = os.path.split(__file__)
   pypakrdir = this_dir
   if command == 'create-image':
