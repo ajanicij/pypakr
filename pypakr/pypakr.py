@@ -5,6 +5,7 @@ import ConfigParser
 import os.path, re
 import tempfile
 import tarfile
+import distutils.core
 
 def usage():
   print '''
@@ -55,19 +56,19 @@ def adjust_file(file, pattern, target, home):
   os.chmod(file, mode)
 
 def adjust_virtualenv(directory):
-  print 'adjust_virtualenv'
+  # print 'adjust_virtualenv'
   abspath = os.path.abspath(directory)
   bindir = os.path.join(abspath, 'bin')
   pythonpath = os.path.join(bindir, 'python')
-  print 'bindir=', bindir
-  print 'abspath=', abspath
+  # print 'bindir=', bindir
+  # print 'abspath=', abspath
   adjust_file(os.path.join(bindir, 'activate'),
     'VIRTUAL_ENV=".*"', 'VIRTUAL_ENV="%s"\n', abspath)
   adjust_file(os.path.join(bindir, 'activate.csh'),
     'setenv VIRTUAL_ENV ".*"', 'setenv VIRTUAL_ENV "%s"\n', abspath)
   adjust_file(os.path.join(bindir, 'activate.fish'),
     'set -gx VIRTUAL_ENV ".*"', 'set -gx VIRTUAL_ENV "%s"\n', abspath)
-  adjust_file(os.path.join(bindir, '/easy_install'),
+  adjust_file(os.path.join(bindir, 'easy_install'),
     '#!/.*', '#!%s\n', pythonpath)
   adjust_file(os.path.join(bindir, 'easy_install-2.7'),
     '#!/.*', '#!%s\n', pythonpath )
@@ -116,24 +117,24 @@ def command_create_image(base, src, dst, pypakrdir=''):
   try:
     tmpdir = tempfile.mkdtemp()
     flag_tmpdir_created = True
-    print 'tmpdir=', tmpdir
+    # print 'tmpdir=', tmpdir
     srcdir = os.path.join(tmpdir, 'SRC')
-    print 'srcdir=', srcdir
+    # print 'srcdir=', srcdir
     os.mkdir(srcdir)
     untar(src, srcdir)
     imgdir = os.path.join(tmpdir, 'IMAGE')
-    print 'imgdir=', imgdir
+    # print 'imgdir=', imgdir
     os.mkdir(imgdir)
     line = 'unionfs -o cow %s=RW:%s=RO %s' % (srcdir, base, imgdir)
     os.system(line)
     flag_union_created = True
-    print 'pypakrdir=', pypakrdir
+    # print 'pypakrdir=', pypakrdir
     create_install(imgdir)
     adjust_virtualenv(imgdir)
     line = 'cd %s && vex --path . ./install' % imgdir
-    print 'calling', line
+    # print 'calling', line
     os.system(line)
-    print 'calling fusermount'
+    # print 'calling fusermount'
     os.system('fusermount -u %s' % imgdir)
     flag_union_created = False
     tar(srcdir, dst)
@@ -156,20 +157,27 @@ def command_create_container(base, image, container):
   flag_container_created = False
   flag_tmpdir_created = False
   try:
+    # print 'mkdir ', container
     os.mkdir(container)
+    # print 'after mkdir'
     flag_container_created = True
     # os.system('cp -R %s/* %s' % (base, container))
-    shutil.copytree(base, container)
+    # print 'copytree %s to %s' % (base, container)
+    # shutil.copytree(base, container)
+    distutils.dir_util.copy_tree(base, container)
+    # print 'mkdtemp'
     tmpdir = tempfile.mkdtemp()
     flag_tmpdir_created = True
-    print 'tmpdir=', tmpdir
+    # print 'tmpdir=', tmpdir
     # imgdir = '%s/IMAGE' % tmpdir
     imgdir = os.path.join(tmpdir, 'IMAGE')
-    print 'imgdir=', imgdir
+    # print 'imgdir=', imgdir
     os.mkdir(imgdir)
     untar(image, imgdir)
     # os.system('cp -R %s/* %s' % (imgdir, container))
-    shutil.copytree(imgdir, container)
+    # print 'copying %s to %s' % (imgdir, container)
+    # shutil.copytree(imgdir, container)
+    distutils.dir_util.copy_tree(imgdir, container)
     adjust_virtualenv(container)
   except Exception as ex:
     if flag_tmpdir_created:
