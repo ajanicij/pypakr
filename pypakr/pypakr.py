@@ -154,6 +154,17 @@ def command_create_image(base, src, dst, pypakrdir=''):
       shutil.rmtree(tmpdir)
     raise ex
 
+def copytree(src, dst):
+  '''
+  Copy directory src to dst.
+  How it differs from shutil.copytree: it works if directory dst
+  exists.
+  How it differs from distutils.dir_util.copy_tree: it is much faster.
+  The version of command_create_container with distutils.dir_util.copy_tree
+  takes from 48s to 1m 16s, compared to 7s with cp -R ...
+  '''
+  os.system('cp -R %s/* %s' % (src, dst))
+
 def command_create_container(base, image, container):
   # print 'In command_create_container'
   if not os.path.exists(image):
@@ -165,25 +176,18 @@ def command_create_container(base, image, container):
   try:
     # print 'mkdir ', container
     os.mkdir(container)
-    # print 'after mkdir'
     flag_container_created = True
-    # os.system('cp -R %s/* %s' % (base, container))
-    # print 'copytree %s to %s' % (base, container)
+    copytree(base, container)
     # shutil.copytree(base, container)
-    distutils.dir_util.copy_tree(base, container)
-    # print 'mkdtemp'
+    # distutils.dir_util.copy_tree(base, container)
     tmpdir = tempfile.mkdtemp()
     flag_tmpdir_created = True
-    # print 'tmpdir=', tmpdir
-    # imgdir = '%s/IMAGE' % tmpdir
     imgdir = os.path.join(tmpdir, 'IMAGE')
-    # print 'imgdir=', imgdir
     os.mkdir(imgdir)
     untar(image, imgdir)
-    # os.system('cp -R %s/* %s' % (imgdir, container))
-    # print 'copying %s to %s' % (imgdir, container)
+    copytree(imgdir, container)
     # shutil.copytree(imgdir, container)
-    distutils.dir_util.copy_tree(imgdir, container)
+    # distutils.dir_util.copy_tree(imgdir, container)
     adjust_virtualenv(container)
     shutil.rmtree(tmpdir)
   except Exception as ex:
