@@ -23,10 +23,11 @@ pypakr <command> <parameters>
        - Arguments:
          -i, --image <image-file>
          -c, --container <container-directory>
-    - run               - run container (execute script run in the
+    - run               - run container (execute script in the
                           container's virtual environment)
        - Arguments:
          -c, --container <container-directory>
+         -r, --script <script-to-execute>
 
 Configuration is in file ~/.pypakr
 [Global]
@@ -202,10 +203,10 @@ def command_create_container(base, image, container):
 def command_init(base):
   os.system('vex --make --path %s' % base)
 
-def command_run(container):
+def command_run(container, script):
   if container == None:
     usage()
   print 'container=', container
   if (not os.path.exists(container)) or (not os.path.isdir(container)):
     raise Exception('%s is not a directory' % container)
-  os.system('cd %s && vex --path . ./run' % container)
+  os.system('cd %s && vex --path . %s' % (container, script))

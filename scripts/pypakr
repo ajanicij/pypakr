@@ -18,14 +18,15 @@ def main(argv):
     usage()
   # Parse command line.
   try:
-    opts, args = getopt.getopt(sys.argv[2:], 'hs:i:c:', ['help',
-      'src', 'image', 'container'])
+    opts, args = getopt.getopt(sys.argv[2:], 'hs:i:c:r:', ['help',
+      'src', 'image', 'container', 'script'])
   except Exception as err:
     print str(err)
     usage()
   opt_s = None
   opt_i = None
   opt_c = None
+  opt_r = None
   for o, a in opts:
     if o in ['-s', '--src']:
       opt_s = a
@@ -33,13 +34,15 @@ def main(argv):
       opt_i = a
     elif o in ['-c', '--container']:
       opt_c = a
+    elif o in ['-r', '--script']:
+      opt_r = a
     elif o in ['-h', '--help']:
       usage()
     else:
       assert False, 'Unrecognized option: %s' % o
   config = ConfigParser.RawConfigParser()
   home = os.environ['HOME']
-  config_path = '%s/.pypakr' % home
+  config_path = os.path.join(home, '.pypakr')
   config.read(config_path)
   base = config.get('Global', 'base')
   pypakrdir = config.get('Global', 'pypakrdir')
@@ -53,7 +56,7 @@ def main(argv):
   elif command == 'init':
     command_init(base)
   elif command == 'run':
-    command_run(container=opt_c)
+    command_run(container=opt_c, script=opt_r)
   else:
     assert Exception, 'Unrecognized command: %s' % command
 
