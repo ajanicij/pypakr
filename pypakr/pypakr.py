@@ -206,7 +206,7 @@ def command_init(base):
 def command_run(container, script):
   if container == None:
     usage()
-  print 'container=', container
+  # print 'container=', container
   if (not os.path.exists(container)) or (not os.path.isdir(container)):
     raise Exception('%s is not a directory' % container)
   os.system('cd %s && vex --path . %s' % (container, script))
