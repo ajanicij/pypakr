@@ -43,10 +43,19 @@ def main(argv):
   config = ConfigParser.RawConfigParser()
   home = os.environ['HOME']
   config_path = os.path.join(home, '.pypakr')
+
+  # Special case: if we are initializing pypakr and file ~/.pypakr
+  # doesn't exist, create the default version.
+  if command == 'init':
+    if not os.path.isfile(config_path):
+      f = open(config_path, 'w')
+      f.write('[Global]' + os.linesep)
+      f.write(('base = %s' % os.path.join(home, 'pypakr', 'BASE')) +
+        os.linesep)
+      f.close()
+
   config.read(config_path)
   base = config.get('Global', 'base')
-  print 'command=', command
-  this_dir, this_filename = os.path.split(__file__)
   if command == 'create-image':
     command_create_image(base=base, src=opt_s, dst=opt_i)
   elif command == 'create-container':
