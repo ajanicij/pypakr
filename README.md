@@ -54,10 +54,6 @@ On Ubuntu, install unionfs-fuse like this:
 
 Run
 
-    python setup.py install
-
-or
-
     pip install pypakr
 
 ## Initialization
