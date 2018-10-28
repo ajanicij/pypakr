@@ -32,7 +32,6 @@ pypakr <command> <parameters>
 Configuration is in file ~/.pypakr
 [Global]
 base = /home/george/pypakr/BASE
-pypakrdir = /home/george/pypakr
 '''
   sys.exit(0)
 
@@ -116,7 +115,7 @@ def create_install(dir):
   f.close()
   os.chmod(filepath, 0744)
 
-def command_create_image(base, src, dst, pypakrdir=''):
+def command_create_image(base, src, dst):
   if not os.path.exists(src):
     raise Exception('file doesn\'t exist: %s' % src)
   flag_union_created = False
@@ -135,7 +134,6 @@ def command_create_image(base, src, dst, pypakrdir=''):
     line = 'unionfs -o cow %s=RW:%s=RO %s' % (srcdir, base, imgdir)
     os.system(line)
     flag_union_created = True
-    # print 'pypakrdir=', pypakrdir
     create_install(imgdir)
     adjust_virtualenv(imgdir)
     line = 'cd %s && vex --path . ./install' % imgdir

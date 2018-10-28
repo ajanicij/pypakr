@@ -45,12 +45,10 @@ def main(argv):
   config_path = os.path.join(home, '.pypakr')
   config.read(config_path)
   base = config.get('Global', 'base')
-  pypakrdir = config.get('Global', 'pypakrdir')
-  # print 'command=', command
+  print 'command=', command
   this_dir, this_filename = os.path.split(__file__)
-  pypakrdir = this_dir
   if command == 'create-image':
-    command_create_image(base=base, src=opt_s, dst=opt_i, pypakrdir=pypakrdir)
+    command_create_image(base=base, src=opt_s, dst=opt_i)
   elif command == 'create-container':
     command_create_container(base=base, image=opt_i, container=opt_c)
   elif command == 'init':

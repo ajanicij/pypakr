@@ -70,7 +70,6 @@ configuration file that looks like this:
 ```
 [Global]
 base = /home/george/pypakr/BASE
-pypakrdir = /home/george/pypakr
 ```
 
 Replace /home/george with your home directory.
@@ -115,7 +114,6 @@ pypakr <command> <parameters>
 Configuration is in file ~/.pypakr
 [Global]
 base = /home/george/pypakr/BASE
-pypakrdir = /home/george/pypakr
 ```
 
 See documentation in directory doc. As a quick reminder, here are the steps
