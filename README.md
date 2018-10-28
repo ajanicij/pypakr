@@ -58,25 +58,28 @@ Run
 
 ## Initialization
 
-After you installed pypakr, there are two steps necessary to initialize it:
+After you installed pypakr, run command
 
-1. Create file .pypakr in your home directory. This file is a simple
-configuration file that looks like this:
+    pypakr init
+
+It will create configuration file .pypakr in your home directory and
+also create a base virtual environment in directory
+
+    $HOME/pypakr/BASE
+
+By default, if .pypakr does not exist before you run pypakr init, it
+will be created to look like this:
 
 ```
 [Global]
 base = /home/george/pypakr/BASE
 ```
+where /home/george stands for your home directory.
 
-Replace /home/george with your home directory.
-
-2. Run command
-
-    pypakr init
-
-This will create virtual environment in the directory defined by the value
-of base you specified in the configuration file, /home/george/pypakr/BASE
-in our example.
+However, if you don't like this default, create .pypakr and set value of
+key base to point to some other path. Then run pypakr init, and it will
+try to create the base directory if it doesn't exist and then create
+a virtual environment in it.
 
 # Help
 
