@@ -230,10 +230,7 @@ def command_create_container(image, container):
   create_container(base, image, container)
 
 def init(base):
-  print 'before vex'
-  # sys.exit()
   os.system('virtualenv %s' % base)
-  print 'after vex'
 
 def command_init():
   create_base()
