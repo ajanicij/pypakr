@@ -50,6 +50,16 @@ On Ubuntu, install unionfs-fuse like this:
 
     sudo apt-get install unionfs-fuse
 
+## Testing
+
+pypakr can be tested before installing by running
+
+    tox
+
+or after installing by running
+
+    pytest
+
 ## Installation
 
 Run
