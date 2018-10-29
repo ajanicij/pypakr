@@ -35,6 +35,29 @@ base = /home/george/pypakr/BASE
 '''
   sys.exit(0)
 
+def get_config_path():
+  config = ConfigParser.RawConfigParser()
+  home = os.environ['HOME']
+  config_path = os.path.join(home, '.pypakr')
+  return config_path
+
+def get_base():
+  config = ConfigParser.RawConfigParser()
+  config_path = get_config_path()
+  config.read(config_path)
+  base = config.get('Global', 'base')
+  return base
+
+def create_base():
+  config_path = get_config_path()
+  home = os.environ['HOME']
+  if not os.path.isfile(config_path):
+    f = open(config_path, 'w')
+    f.write('[Global]' + os.linesep)
+    f.write(('base = %s' % os.path.join(home, 'pypakr', 'BASE')) +
+      os.linesep)
+    f.close()
+
 def containing_directory(path):
   abspath = os.path.abspath(path)
   return os.path.dirname(abspath)
@@ -115,7 +138,7 @@ def create_install(dir):
   f.close()
   os.chmod(filepath, 0744)
 
-def command_create_image(base, src, dst):
+def create_image(base, src, dst):
   if not os.path.exists(src):
     raise Exception('file doesn\'t exist: %s' % src)
   flag_union_created = False
@@ -153,6 +176,10 @@ def command_create_image(base, src, dst):
       shutil.rmtree(tmpdir)
     raise ex
 
+def command_create_image(src, dst):
+  base = get_base()
+  create_image(base, src, dst)
+
 def copytree(src, dst):
   '''
   Copy directory src to dst.
@@ -164,7 +191,7 @@ def copytree(src, dst):
   '''
   os.system('cp -R %s/* %s' % (src, dst))
 
-def command_create_container(base, image, container):
+def create_container(base, image, container):
   # print 'In command_create_container'
   if not os.path.exists(image):
     raise Exception('file doesn\'t exist: %s' % image)
@@ -198,13 +225,28 @@ def command_create_container(base, image, container):
       shutil.rmtree(container)
     raise ex
 
-def command_init(base):
-  os.system('vex --make --path %s' % base)
+def command_create_container(image, container):
+  base = get_base()
+  create_container(base, image, container)
 
-def command_run(container, script):
+def init(base):
+  print 'before vex'
+  # sys.exit()
+  os.system('virtualenv %s' % base)
+  print 'after vex'
+
+def command_init():
+  create_base()
+  base = get_base()
+  init(base)
+
+def run(container, script):
   if container == None:
     usage()
   # print 'container=', container
   if (not os.path.exists(container)) or (not os.path.isdir(container)):
     raise Exception('%s is not a directory' % container)
   os.system('cd %s && vex --path . %s' % (container, script))
+
+def command_run(container, script):
+  run(container, script)
