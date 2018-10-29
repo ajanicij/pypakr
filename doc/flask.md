@@ -71,3 +71,15 @@ or open that URL in a web browser on the same machine. It will return
 
     Hello, World!
 
+NOTE: In Flask, you can run an application using the flask script, but we cannot
+use that with pypakr because it has a wrong path to python in its shebang: in
+the step of creating an image using pypakr create-image, Flask is installed and
+it sets the path in the shebang to the path that matches the temporary directory
+used to generate the image, which is of course different from the path where
+the container will be when it is finally created.
+
+For example: that shebank line in the flask script might look like this:
+
+    #!/tmp/tmpWHefpD/IMAGE/bin/python
+
+That is why we have a shell script run that starts a Flask application.
