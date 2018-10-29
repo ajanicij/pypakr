@@ -36,12 +36,13 @@ base = /home/george/pypakr/BASE
   sys.exit(0)
 
 def get_config_path():
-  config = ConfigParser.RawConfigParser()
+  'Return the path of .pypakr file.'
   home = os.environ['HOME']
   config_path = os.path.join(home, '.pypakr')
   return config_path
 
 def get_base():
+  'Returns the path of virtualenv base directory.'
   config = ConfigParser.RawConfigParser()
   config_path = get_config_path()
   config.read(config_path)
@@ -49,6 +50,7 @@ def get_base():
   return base
 
 def create_base():
+  'Checks if .pypakr exists in home directory and creates it if it doesn\'t.'
   config_path = get_config_path()
   home = os.environ['HOME']
   if not os.path.isfile(config_path):
@@ -59,11 +61,14 @@ def create_base():
     f.close()
 
 def containing_directory(path):
+  'Returns the directory that the path is in.'
   abspath = os.path.abspath(path)
   return os.path.dirname(abspath)
 
 # adjust file
 def adjust_file(file, pattern, target, home):
+  '''Adjusts a file by replacing all lines that match the pattern with
+     a line constructed from target and specified home directory.'''
   outfile = file + '.tmp'
   mode = os.stat(file).st_mode
   with open(file) as f:
@@ -79,6 +84,8 @@ def adjust_file(file, pattern, target, home):
   os.chmod(file, mode)
 
 def adjust_virtualenv(directory):
+  '''Adjust a precise set of scripts in virtual environment\'s bin
+     directory according to the virtual environment\'s current location.'''
   # print 'adjust_virtualenv'
   abspath = os.path.abspath(directory)
   bindir = os.path.join(abspath, 'bin')
@@ -107,12 +114,14 @@ def adjust_virtualenv(directory):
     '#!/.*', '#!%s\n', pythonpath)
 
 def untar(file, directory):
-  # print 'untar %s to %s' % (file, directory)
+  'Untar a specified tar file into specified directory.'
   tar = tarfile.open(file)
   tar.extractall(path=directory)
   tar.close()
 
 def tar(srcdir, dist):
+  '''Tar all files and directories in the specified source directory and
+     write to the specified path.'''
   tf = tarfile.open(dist, 'w')
   flag_chdir = False
   try:
@@ -129,6 +138,7 @@ def tar(srcdir, dist):
     os.chdir(pathsave)
 
 def create_install(dir):
+  'Create install script in the specified directory.'
   filepath = os.path.join(dir, 'install')
   f = open(filepath, 'w')
   f.write('''#!/bin/sh
@@ -139,6 +149,7 @@ def create_install(dir):
   os.chmod(filepath, 0744)
 
 def create_image(base, src, dst):
+  'Create image file.'
   if not os.path.exists(src):
     raise Exception('file doesn\'t exist: %s' % src)
   flag_union_created = False
@@ -177,6 +188,7 @@ def create_image(base, src, dst):
     raise ex
 
 def command_create_image(src, dst):
+  'Execute pypakr create-image.'
   base = get_base()
   create_image(base, src, dst)
 
@@ -192,7 +204,7 @@ def copytree(src, dst):
   os.system('cp -R %s/* %s' % (src, dst))
 
 def create_container(base, image, container):
-  # print 'In command_create_container'
+  'Create container.'
   if not os.path.exists(image):
     raise Exception('file doesn\'t exist: %s' % image)
   if (image == None) or (container == None):
@@ -226,18 +238,22 @@ def create_container(base, image, container):
     raise ex
 
 def command_create_container(image, container):
+  'Execute command pypakr create-container.'
   base = get_base()
   create_container(base, image, container)
 
 def init(base):
+  'Initialize pypakr.'
   os.system('virtualenv %s' % base)
 
 def command_init():
+  'Execute command pypakr init.'
   create_base()
   base = get_base()
   init(base)
 
 def run(container, script):
+  'Run specified script in the specified container.'
   if container == None:
     usage()
   # print 'container=', container
@@ -246,4 +262,5 @@ def run(container, script):
   os.system('cd %s && vex --path . %s' % (container, script))
 
 def command_run(container, script):
+  'Execute command pypakr run.'
   run(container, script)
