@@ -62,9 +62,13 @@ or after installing by running
 
 ## Installation
 
-Run
+From source: run
 
     pip install pypakr
+
+From PYPI: run
+
+    pip install pypakr-pkg
 
 ## Initialization
 
