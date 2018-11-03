@@ -9,7 +9,7 @@ import distutils.core
 
 def usage():
   print '''
-pypakr
+pypakr Version 0.0.4
 Python containers
 Usage:
 pypakr <command> <parameters>
