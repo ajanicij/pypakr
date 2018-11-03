@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
   name='pypakr_pkg',
-  version='0.0.1',
+  version='0.0.3',
   author='Aleksandar Janicijevic',
   author_email='aleks@vogonsoft.com',
   description='Python containers',
@@ -16,13 +16,16 @@ setuptools.setup(
   include_package_data=True,
   classifiers=[
     'Programming Language :: Python :: 2.7',
-    'License :: OSI Approved :: Apache 2.0',
-    'Operating System :: Linux',
+    'License :: OSI Approved :: Apache Software License',
+    'Operating System :: POSIX :: Linux',
   ],
   scripts = [
     'scripts/pypakr'
   ],
-  install_requires=['vex'],
+  install_requires=[
+    'vex',
+    'virtualenv>=10.0.0'
+  ],
   package_data={
     'data': ['install'],
   },
